@@ -17,6 +17,7 @@
           QR code or ZIP package.
         </p>
       </div>
+
       <div class="version-badge">v{{ version }}</div>
     </header>
 
@@ -27,10 +28,14 @@
             <p class="section-kicker">INPUT</p>
             <h2>Client configuration</h2>
           </div>
-          <button id="clearButton" class="ghost-button" type="button">Clear</button>
+
+          <button id="clearButton" class="ghost-button" type="button">
+            Clear
+          </button>
         </div>
 
         <label class="field-label" for="device">Device name</label>
+
         <input
           id="device"
           class="text-input"
@@ -49,6 +54,7 @@
           <div class="drop-icon">⇧</div>
           <strong>Drop a WireGuard configuration here</strong>
           <span>or click to choose a .conf or .txt file</span>
+
           <input
             id="fileInput"
             type="file"
@@ -57,9 +63,12 @@
           >
         </div>
 
-        <div class="divider"><span>OR PASTE TEXT</span></div>
+        <div class="divider">
+          <span>OR PASTE TEXT</span>
+        </div>
 
         <label class="field-label" for="config">Configuration</label>
+
         <textarea
           id="config"
           spellcheck="false"
@@ -67,7 +76,7 @@
           placeholder="[Interface]
 PrivateKey = ...
 Address = 10.10.10.2/32
-DNS = 192.168.123.1
+DNS = 192.168.1.1
 
 [Peer]
 PublicKey = ...
@@ -87,7 +96,10 @@ PersistentKeepalive = 25"
             <p class="section-kicker">LIVE PREVIEW</p>
             <h2>Configuration summary</h2>
           </div>
-          <span id="statusPill" class="status-pill neutral">Empty</span>
+
+          <span id="statusPill" class="status-pill neutral">
+            Empty
+          </span>
         </div>
 
         <dl class="summary-grid">
@@ -95,22 +107,27 @@ PersistentKeepalive = 25"
             <dt>Device</dt>
             <dd id="summaryDevice">—</dd>
           </div>
+
           <div>
             <dt>Endpoint</dt>
             <dd id="summaryEndpoint">—</dd>
           </div>
+
           <div>
             <dt>Tunnel address</dt>
             <dd id="summaryAddress">—</dd>
           </div>
+
           <div>
             <dt>DNS</dt>
             <dd id="summaryDns">—</dd>
           </div>
+
           <div>
             <dt>Allowed IPs</dt>
             <dd id="summaryAllowed">—</dd>
           </div>
+
           <div>
             <dt>Tunnel type</dt>
             <dd id="summaryTunnel">—</dd>
@@ -121,7 +138,12 @@ PersistentKeepalive = 25"
           <div id="qrPlaceholder" class="qr-placeholder">
             <span>QR preview appears here</span>
           </div>
-          <img id="qrImage" alt="WireGuard QR code preview" hidden>
+
+          <img
+            id="qrImage"
+            alt="WireGuard QR code preview"
+            hidden
+          >
         </div>
 
         <div class="download-grid">
@@ -163,6 +185,15 @@ PersistentKeepalive = 25"
       <span>Version {{ version }}</span>
       <span>Runs locally</span>
       <span>No data leaves this server</span>
+
+      <a
+        class="github-footer-link"
+        href="https://github.com/Mauckisch/OPNsense-WireGuard-Config-Generator"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View on GitHub
+      </a>
     </footer>
   </div>
 

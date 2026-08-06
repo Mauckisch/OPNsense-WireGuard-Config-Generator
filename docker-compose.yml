@@ -1,7 +1,9 @@
 services:
   generator:
+    image: ghcr.io/mauckisch/opnsense-wireguard-config-generator:latest
     container_name: opnsense-wireguard-config-generator
-    build: .
     restart: unless-stopped
+    init: true
+
     ports:
       - "8787:8787"

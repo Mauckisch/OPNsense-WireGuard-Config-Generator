@@ -329,3 +329,15 @@ footer {
   .summary-grid div { grid-template-columns: 1fr; gap: 4px; }
   .summary-grid dd { text-align: left; }
 }
+
+/* GitHub footer link */
+.github-footer-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.github-footer-link:hover,
+.github-footer-link:focus-visible {
+  text-decoration: underline;
+}
