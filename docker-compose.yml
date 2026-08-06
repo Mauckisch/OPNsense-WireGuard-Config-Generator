@@ -1,0 +1,7 @@
+services:
+  generator:
+    container_name: opnsense-wireguard-config-generator
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8787:8787"

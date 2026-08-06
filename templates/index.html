@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OPNsense WireGuard Config Generator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">LOCAL CONFIGURATION TOOL</p>
+        <h1>OPNsense WireGuard Config Generator</h1>
+        <p class="subtitle">
+          Paste or upload an OPNsense peer configuration and generate a client profile,
+          QR code or ZIP package.
+        </p>
+      </div>
+      <div class="version-badge">v{{ version }}</div>
+    </header>
+
+    <main class="workspace">
+      <section class="editor-card card">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">INPUT</p>
+            <h2>Client configuration</h2>
+          </div>
+          <button id="clearButton" class="ghost-button" type="button">Clear</button>
+        </div>
+
+        <label class="field-label" for="device">Device name</label>
+        <input
+          id="device"
+          class="text-input"
+          type="text"
+          autocomplete="off"
+          placeholder="e.g. macbook-pro"
+        >
+
+        <div
+          id="dropZone"
+          class="drop-zone"
+          tabindex="0"
+          role="button"
+          aria-label="Upload WireGuard configuration"
+        >
+          <div class="drop-icon">⇧</div>
+          <strong>Drop a WireGuard configuration here</strong>
+          <span>or click to choose a .conf or .txt file</span>
+          <input
+            id="fileInput"
+            type="file"
+            accept=".conf,.txt,text/plain"
+            hidden
+          >
+        </div>
+
+        <div class="divider"><span>OR PASTE TEXT</span></div>
+
+        <label class="field-label" for="config">Configuration</label>
+        <textarea
+          id="config"
+          spellcheck="false"
+          autocomplete="off"
+          placeholder="[Interface]
+PrivateKey = ...
+Address = 10.10.10.2/32
+DNS = 192.168.123.1
+
+[Peer]
+PublicKey = ...
+AllowedIPs = 0.0.0.0/0
+Endpoint = vpn.example.org:51820
+PersistentKeepalive = 25"
+        ></textarea>
+
+        <div id="message" class="message neutral">
+          Waiting for a configuration.
+        </div>
+      </section>
+
+      <aside class="summary-card card">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">LIVE PREVIEW</p>
+            <h2>Configuration summary</h2>
+          </div>
+          <span id="statusPill" class="status-pill neutral">Empty</span>
+        </div>
+
+        <dl class="summary-grid">
+          <div>
+            <dt>Device</dt>
+            <dd id="summaryDevice">—</dd>
+          </div>
+          <div>
+            <dt>Endpoint</dt>
+            <dd id="summaryEndpoint">—</dd>
+          </div>
+          <div>
+            <dt>Tunnel address</dt>
+            <dd id="summaryAddress">—</dd>
+          </div>
+          <div>
+            <dt>DNS</dt>
+            <dd id="summaryDns">—</dd>
+          </div>
+          <div>
+            <dt>Allowed IPs</dt>
+            <dd id="summaryAllowed">—</dd>
+          </div>
+          <div>
+            <dt>Tunnel type</dt>
+            <dd id="summaryTunnel">—</dd>
+          </div>
+        </dl>
+
+        <div class="qr-panel">
+          <div id="qrPlaceholder" class="qr-placeholder">
+            <span>QR preview appears here</span>
+          </div>
+          <img id="qrImage" alt="WireGuard QR code preview" hidden>
+        </div>
+
+        <div class="download-grid">
+          <button
+            class="download-button"
+            type="button"
+            data-download="conf"
+            disabled
+          >
+            Download .conf
+          </button>
+
+          <button
+            class="download-button"
+            type="button"
+            data-download="png"
+            disabled
+          >
+            Download PNG
+          </button>
+
+          <button
+            class="download-button primary"
+            type="button"
+            data-download="zip"
+            disabled
+          >
+            Download ZIP
+          </button>
+        </div>
+
+        <p class="privacy-note">
+          Nothing is stored. Reloading the page clears all fields and previews.
+        </p>
+      </aside>
+    </main>
+
+    <footer>
+      <span>Version {{ version }}</span>
+      <span>Runs locally</span>
+      <span>No data leaves this server</span>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

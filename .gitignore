@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Application runtime files
+*.log
+*.pid
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# Generated WireGuard files
+*.conf
+*.png
+*.zip
+
+# Local backups
+backup-old/
+backup/
+backups/
+
+# GitHub CLI and temporary files
+.tmp/
+tmp/

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=OPNsense WireGuard Config Generator
+Comment=Generate WireGuard configuration files, QR codes and ZIP packages
+Exec=sh -c "$HOME/.local/bin/opnsense-wireguard-config-generator"
+Terminal=true
+Categories=Network;Utility;
