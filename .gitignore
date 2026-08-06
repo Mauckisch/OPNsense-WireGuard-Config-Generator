@@ -44,3 +44,6 @@ backups/
 # GitHub CLI and temporary files
 .tmp/
 tmp/
+
+# Local development environment
+/docker-compose.dev.yml
