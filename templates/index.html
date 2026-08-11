@@ -3,77 +3,182 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>OPNsense WireGuard Config Generator</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href="{{ url_for('static', filename='img/favicon.svg') }}"
+  >
+
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}"
+  >
 </head>
+
 <body>
-  <div class="page-shell">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">LOCAL CONFIGURATION TOOL</p>
-        <h1>OPNsense WireGuard Config Generator</h1>
-        <p class="subtitle">
-          Paste or upload an OPNsense peer configuration and generate a client profile,
-          QR code or ZIP package.
-        </p>
+  <div class="app-shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+      <div class="sidebar-brand">
+        <img
+          class="sidebar-logo"
+          src="{{ url_for('static', filename='img/logo.svg') }}"
+          alt="OPNsense WireGuard Config Generator"
+        >
+
+        <div class="sidebar-brand-copy">
+          <strong>WG Config</strong>
+          <span>OPNsense Generator</span>
+        </div>
       </div>
 
-      <div class="version-badge">v{{ version }}</div>
-    </header>
+      <nav class="sidebar-nav" aria-label="Main navigation">
 
-    <main class="workspace">
-      <section class="editor-card card">
-        <div class="section-heading">
+        <button
+          class="sidebar-nav-item active"
+          type="button"
+          aria-current="page"
+        >
+          <span class="sidebar-nav-icon" aria-hidden="true">⌘</span>
+          <span>Generator</span>
+        </button>
+
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+
+      <button
+        id="aboutButton"
+        class="sidebar-about"
+        type="button"
+      >
+        <span class="sidebar-about-icon" aria-hidden="true">ⓘ</span>
+
+        <span class="sidebar-about-copy">
+          <strong>OPNsense WG Config</strong>
+          <span>v{{ version }}</span>
+        </span>
+      </button>
+
+    </aside>
+
+
+    <!-- Application area -->
+    <div class="app-content">
+
+      <!-- Top bar -->
+      <header class="app-topbar">
+
+        <div class="topbar-title">
+          <strong>OPNsense WireGuard Config Generator</strong>
+          <span>Client Configuration Tool</span>
+        </div>
+
+      </header>
+
+
+      <!-- Main content -->
+      <main class="main-content">
+
+        <div class="page-heading">
           <div>
-            <p class="section-kicker">INPUT</p>
-            <h2>Client configuration</h2>
+            <p class="eyebrow">WIREGUARD CLIENT CONFIGURATION</p>
+
+            <h1>Config Generator</h1>
+
+            <p class="subtitle">
+              Paste or upload an OPNsense peer configuration and generate
+              a client profile, QR code or ZIP package.
+            </p>
           </div>
-
-          <button id="clearButton" class="ghost-button" type="button">
-            Clear
-          </button>
         </div>
 
-        <label class="field-label" for="device">Device name</label>
 
-        <input
-          id="device"
-          class="text-input"
-          type="text"
-          autocomplete="off"
-          placeholder="e.g. macbook-pro"
-        >
+        <div class="workspace">
 
-        <div
-          id="dropZone"
-          class="drop-zone"
-          tabindex="0"
-          role="button"
-          aria-label="Upload WireGuard configuration"
-        >
-          <div class="drop-icon">⇧</div>
-          <strong>Drop a WireGuard configuration here</strong>
-          <span>or click to choose a .conf or .txt file</span>
+          <!-- Configuration editor -->
+          <section class="editor-card card">
 
-          <input
-            id="fileInput"
-            type="file"
-            accept=".conf,.txt,text/plain"
-            hidden
-          >
-        </div>
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">INPUT</p>
+                <h2>Client configuration</h2>
+              </div>
 
-        <div class="divider">
-          <span>OR PASTE TEXT</span>
-        </div>
+              <button
+                id="clearButton"
+                class="ghost-button"
+                type="button"
+              >
+                Clear
+              </button>
+            </div>
 
-        <label class="field-label" for="config">Configuration</label>
 
-        <textarea
-          id="config"
-          spellcheck="false"
-          autocomplete="off"
-          placeholder="[Interface]
+            <label
+              class="field-label"
+              for="device"
+            >
+              Device name
+            </label>
+
+            <input
+              id="device"
+              class="text-input"
+              type="text"
+              autocomplete="off"
+              placeholder="e.g. macbook-pro"
+            >
+
+
+            <div
+              id="dropZone"
+              class="drop-zone"
+              tabindex="0"
+              role="button"
+              aria-label="Upload WireGuard configuration"
+            >
+              <div class="drop-icon">⇧</div>
+
+              <strong>
+                Drop a WireGuard configuration here
+              </strong>
+
+              <span>
+                or click to choose a .conf or .txt file
+              </span>
+
+              <input
+                id="fileInput"
+                type="file"
+                accept=".conf,.txt,text/plain"
+                hidden
+              >
+            </div>
+
+
+            <div class="divider">
+              <span>OR PASTE TEXT</span>
+            </div>
+
+
+            <label
+              class="field-label"
+              for="config"
+            >
+              Configuration
+            </label>
+
+            <textarea
+              id="config"
+              spellcheck="false"
+              autocomplete="off"
+              placeholder="[Interface]
 PrivateKey = ...
 Address = 10.10.10.2/32
 DNS = 192.168.1.1
@@ -83,119 +188,256 @@ PublicKey = ...
 AllowedIPs = 0.0.0.0/0
 Endpoint = vpn.example.org:51820
 PersistentKeepalive = 25"
-        ></textarea>
+            ></textarea>
 
-        <div id="message" class="message neutral">
-          Waiting for a configuration.
+
+            <div
+              id="message"
+              class="message neutral"
+            >
+              Waiting for a configuration.
+            </div>
+
+          </section>
+
+
+          <!-- Live preview -->
+          <aside class="summary-card card">
+
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">LIVE PREVIEW</p>
+                <h2>Configuration summary</h2>
+              </div>
+
+              <span
+                id="statusPill"
+                class="status-pill neutral"
+              >
+                Empty
+              </span>
+            </div>
+
+
+            <dl class="summary-grid">
+
+              <div>
+                <dt>Device</dt>
+                <dd id="summaryDevice">—</dd>
+              </div>
+
+              <div>
+                <dt>Endpoint</dt>
+                <dd id="summaryEndpoint">—</dd>
+              </div>
+
+              <div>
+                <dt>Tunnel address</dt>
+                <dd id="summaryAddress">—</dd>
+              </div>
+
+              <div>
+                <dt>DNS</dt>
+                <dd id="summaryDns">—</dd>
+              </div>
+
+              <div>
+                <dt>Allowed IPs</dt>
+                <dd id="summaryAllowed">—</dd>
+              </div>
+
+              <div>
+                <dt>Tunnel type</dt>
+                <dd id="summaryTunnel">—</dd>
+              </div>
+
+            </dl>
+
+
+            <div class="qr-panel">
+
+              <div
+                id="qrPlaceholder"
+                class="qr-placeholder"
+              >
+                <span>
+                  QR preview appears here
+                </span>
+              </div>
+
+              <img
+                id="qrImage"
+                alt="WireGuard QR code preview"
+                hidden
+              >
+
+            </div>
+
+
+            <div class="download-grid">
+
+              <button
+                class="download-button"
+                type="button"
+                data-download="conf"
+                disabled
+              >
+                Download .conf
+              </button>
+
+              <button
+                class="download-button"
+                type="button"
+                data-download="png"
+                disabled
+              >
+                Download PNG
+              </button>
+
+              <button
+                class="download-button primary"
+                type="button"
+                data-download="zip"
+                disabled
+              >
+                Download ZIP
+              </button>
+
+            </div>
+
+
+            <p class="privacy-note">
+              Nothing is stored. Reloading the page clears all fields
+              and previews.
+            </p>
+
+          </aside>
+
         </div>
-      </section>
 
-      <aside class="summary-card card">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">LIVE PREVIEW</p>
-            <h2>Configuration summary</h2>
-          </div>
+      </main>
 
-          <span id="statusPill" class="status-pill neutral">
-            Empty
-          </span>
-        </div>
+    </div>
 
-        <dl class="summary-grid">
-          <div>
-            <dt>Device</dt>
-            <dd id="summaryDevice">—</dd>
-          </div>
+  </div>
 
-          <div>
-            <dt>Endpoint</dt>
-            <dd id="summaryEndpoint">—</dd>
-          </div>
 
-          <div>
-            <dt>Tunnel address</dt>
-            <dd id="summaryAddress">—</dd>
-          </div>
+  <!-- About modal -->
+  <div
+    id="aboutModal"
+    class="modal-backdrop"
+    hidden
+  >
 
-          <div>
-            <dt>DNS</dt>
-            <dd id="summaryDns">—</dd>
-          </div>
+    <section
+      class="about-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="aboutTitle"
+    >
 
-          <div>
-            <dt>Allowed IPs</dt>
-            <dd id="summaryAllowed">—</dd>
-          </div>
+      <header class="about-modal-header">
 
-          <div>
-            <dt>Tunnel type</dt>
-            <dd id="summaryTunnel">—</dd>
-          </div>
-        </dl>
+        <strong>
+          OPNsense WireGuard Config Generator
+        </strong>
 
-        <div class="qr-panel">
-          <div id="qrPlaceholder" class="qr-placeholder">
-            <span>QR preview appears here</span>
-          </div>
+        <button
+          id="aboutCloseX"
+          class="modal-close-x"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+      </header>
+
+
+      <div class="about-modal-body">
+
+        <div class="about-identity">
 
           <img
-            id="qrImage"
-            alt="WireGuard QR code preview"
-            hidden
+            class="about-logo"
+            src="{{ url_for('static', filename='img/logo.svg') }}"
+            alt=""
           >
+
+          <div>
+            <h2 id="aboutTitle">
+              OPNsense WireGuard Config Generator
+            </h2>
+
+            <span class="about-version">
+              VERSION {{ version }}
+            </span>
+
+            <p>
+              WireGuard Client Configuration Tool
+            </p>
+          </div>
+
         </div>
 
-        <div class="download-grid">
-          <button
-            class="download-button"
-            type="button"
-            data-download="conf"
-            disabled
-          >
-            Download .conf
-          </button>
 
-          <button
-            class="download-button"
-            type="button"
-            data-download="png"
-            disabled
-          >
-            Download PNG
-          </button>
+        <div class="about-details">
 
-          <button
-            class="download-button primary"
-            type="button"
-            data-download="zip"
-            disabled
-          >
-            Download ZIP
-          </button>
+          <div class="about-detail">
+            <span>Frontend</span>
+            <strong>HTML + CSS + JavaScript</strong>
+          </div>
+
+          <div class="about-detail">
+            <span>Backend</span>
+            <strong>Flask + Gunicorn</strong>
+          </div>
+
+          <div class="about-detail">
+            <span>Runtime</span>
+            <strong>Python</strong>
+          </div>
+
+          <div class="about-detail">
+            <span>Project</span>
+            <strong>OPNsense WireGuard Config Generator</strong>
+          </div>
+
+          <div class="about-detail about-detail-wide">
+            <span>Copyright</span>
+            <strong>© 2026 Dennis Mauckisch</strong>
+          </div>
+
         </div>
 
-        <p class="privacy-note">
-          Nothing is stored. Reloading the page clears all fields and previews.
-        </p>
-      </aside>
-    </main>
+      </div>
 
-    <footer>
-      <span>Version {{ version }}</span>
-      <span>Runs locally</span>
-      <span>No data leaves this server</span>
 
-      <a
-        class="github-footer-link"
-        href="https://github.com/Mauckisch/OPNsense-WireGuard-Config-Generator"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View on GitHub
-      </a>
-    </footer>
+      <footer class="about-modal-footer">
+
+        <a
+          class="about-github-button"
+          href="https://github.com/Mauckisch/OPNsense-WireGuard-Config-Generator"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
+
+        <button
+          id="aboutCloseButton"
+          class="about-close-button"
+          type="button"
+        >
+          Close
+        </button>
+
+      </footer>
+
+    </section>
+
   </div>
+
 
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>

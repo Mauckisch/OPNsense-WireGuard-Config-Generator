@@ -20,6 +20,4 @@ backups
 *.png
 *.zip
 
-opnsense-wireguard-config-generator.desktop
-install.sh
 README.md

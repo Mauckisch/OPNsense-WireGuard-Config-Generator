@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+<title id="title">OPNsense WireGuard Config Generator</title>
+<desc id="desc">Red corporate banner for the OPNsense WireGuard Config Generator project.</desc>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+  <stop stop-color="#240606"/><stop offset=".55" stop-color="#650909"/><stop offset="1" stop-color="#180404"/>
+ </linearGradient>
+ <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+  <circle cx="3" cy="3" r="2" fill="#e63323" opacity=".35"/>
+ </pattern>
+</defs>
+<rect width="1200" height="360" rx="28" fill="url(#bg)"/>
+<rect x="1.5" y="1.5" width="1197" height="357" rx="26.5" fill="none" stroke="#e63323" stroke-width="3"/>
+<rect x="850" y="0" width="350" height="360" fill="url(#dots)" opacity=".7"/>
+<g transform="translate(55 40)">
+ <path d="M130 0 240 42v80c0 68-43 115-110 137C63 237 20 190 20 122V42Z" fill="#3a0707" stroke="#e63323" stroke-width="10"/>
+ <path d="M130 19 220 53v69c0 55-34 94-90 114-56-20-90-59-90-114V53Z" fill="none" stroke="#fff" stroke-width="4"/>
+ <g fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M76 69h108l-30 27 30 27H76l30-27Z"/>
+  <circle cx="130" cy="158" r="38"/>
+  <path d="M117 143c9-13 28-7 28 7 0 11-11 15-18 20-9 6-10 19 1 23 12 5 25-5 24-17"/>
+ </g>
+ <rect x="125" y="91" width="11" height="11" rx="2" fill="#e63323"/>
+ <path d="M97 203h50l22 22v29H97Z" fill="#fff"/>
+ <path d="M107 213h33v20h20" fill="none" stroke="#5b0808" stroke-width="6"/>
+</g>
+<line x1="340" y1="70" x2="340" y2="290" stroke="#e63323" stroke-width="2" opacity=".7"/>
+<text x="395" y="135" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="62" font-weight="800">OPNsense</text>
+<text x="395" y="205" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="66" font-weight="800">WIREGUARD</text>
+<text x="398" y="255" fill="#e63323" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="800" letter-spacing="2">CONFIG GENERATOR</text>
+<line x1="398" y1="278" x2="885" y2="278" stroke="#e63323" stroke-width="3"/>
+<text x="398" y="316" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="600" letter-spacing="1.5">SIMPLE • SECURE • SELF-HOSTED</text>
+<g fill="none" stroke="#e63323" stroke-width="2" opacity=".6">
+ <circle cx="1015" cy="180" r="92"/><circle cx="1015" cy="180" r="55"/>
+ <path d="M923 180h184M1015 88v184M950 115l130 130M1080 115 950 245"/>
+</g>
+<g fill="#fff">
+ <circle cx="1015" cy="88" r="5"/><circle cx="1107" cy="180" r="5"/><circle cx="1015" cy="272" r="5"/><circle cx="923" cy="180" r="5"/>
+</g>
+</svg>

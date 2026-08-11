@@ -16,9 +16,9 @@ VERSION_FILE = Path(__file__).with_name("VERSION")
 
 def get_version() -> str:
     try:
-        return VERSION_FILE.read_text(encoding="utf-8").strip() or "2.0.0"
+        return VERSION_FILE.read_text(encoding="utf-8").strip() or "3.0.0"
     except OSError:
-        return "2.0.0"
+        return "3.0.0"
 
 
 def normalize_config(value: str) -> str:

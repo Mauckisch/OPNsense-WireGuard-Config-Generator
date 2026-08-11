@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="static/img/banner.svg" alt="OPNsense WireGuard Config Generator" width="100%">
+</p>
+
 # OPNsense WireGuard Config Generator
 
 A small self-hosted web application that processes WireGuard client
@@ -154,7 +158,7 @@ Example response:
 ```json
 {
   "status": "ok",
-  "version": "2.2.0"
+  "version": "3.0.0"
 }
 ```
 

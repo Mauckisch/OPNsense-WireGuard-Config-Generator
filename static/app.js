@@ -12,6 +12,11 @@
   const qrPlaceholder = document.querySelector("#qrPlaceholder");
   const downloadButtons = [...document.querySelectorAll("[data-download]")];
 
+  const aboutButton = document.querySelector("#aboutButton");
+  const aboutModal = document.querySelector("#aboutModal");
+  const aboutCloseButton = document.querySelector("#aboutCloseButton");
+  const aboutCloseX = document.querySelector("#aboutCloseX");
+
   const summary = {
     device: document.querySelector("#summaryDevice"),
     endpoint: document.querySelector("#summaryEndpoint"),
@@ -186,6 +191,34 @@
     anchor.remove();
     URL.revokeObjectURL(url);
   }
+
+  function openAboutModal() {
+    aboutModal.hidden = false;
+    document.body.classList.add("modal-open");
+    aboutCloseX.focus();
+  }
+
+  function closeAboutModal() {
+    aboutModal.hidden = true;
+    document.body.classList.remove("modal-open");
+    aboutButton.focus();
+  }
+
+  aboutButton.addEventListener("click", openAboutModal);
+  aboutCloseButton.addEventListener("click", closeAboutModal);
+  aboutCloseX.addEventListener("click", closeAboutModal);
+
+  aboutModal.addEventListener("click", event => {
+    if (event.target === aboutModal) {
+      closeAboutModal();
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !aboutModal.hidden) {
+      closeAboutModal();
+    }
+  });
 
   dropZone.addEventListener("click", () => fileInput.click());
   dropZone.addEventListener("keydown", event => {
