@@ -45,14 +45,14 @@ jobs:
             IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION}"
 
             echo "image_tags<<EOF" >> "${GITHUB_OUTPUT}"
-            echo "ghcr.io/mauckisch/opnsense-wireguard-config-generator:latest" >> "${GITHUB_OUTPUT}"
-            echo "ghcr.io/mauckisch/opnsense-wireguard-config-generator:${VERSION}" >> "${GITHUB_OUTPUT}"
-            echo "ghcr.io/mauckisch/opnsense-wireguard-config-generator:${MAJOR}.${MINOR}" >> "${GITHUB_OUTPUT}"
-            echo "ghcr.io/mauckisch/opnsense-wireguard-config-generator:${MAJOR}" >> "${GITHUB_OUTPUT}"
+            echo "ghcr.io/mauckisch/wireforge:latest" >> "${GITHUB_OUTPUT}"
+            echo "ghcr.io/mauckisch/wireforge:${VERSION}" >> "${GITHUB_OUTPUT}"
+            echo "ghcr.io/mauckisch/wireforge:${MAJOR}.${MINOR}" >> "${GITHUB_OUTPUT}"
+            echo "ghcr.io/mauckisch/wireforge:${MAJOR}" >> "${GITHUB_OUTPUT}"
             echo "EOF" >> "${GITHUB_OUTPUT}"
           else
             echo "image_tags<<EOF" >> "${GITHUB_OUTPUT}"
-            echo "ghcr.io/mauckisch/opnsense-wireguard-config-generator:latest" >> "${GITHUB_OUTPUT}"
+            echo "ghcr.io/mauckisch/wireforge:latest" >> "${GITHUB_OUTPUT}"
             echo "EOF" >> "${GITHUB_OUTPUT}"
           fi
 
@@ -65,7 +65,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.version.outputs.image_tags }}
           labels: |
-            org.opencontainers.image.title=OPNsense WireGuard Config Generator
+            org.opencontainers.image.title=WireForge
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
           cache-from: type=gha
@@ -112,5 +112,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ github.ref_name }}" \
-            --title "OPNsense WireGuard Config Generator ${{ steps.version.outputs.version }}" \
+            --title "WireForge ${{ steps.version.outputs.version }}" \
             --notes-file RELEASE_NOTES.md

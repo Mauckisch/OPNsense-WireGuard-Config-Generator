@@ -1,7 +1,7 @@
 services:
   generator:
-    image: ghcr.io/mauckisch/opnsense-wireguard-config-generator:latest
-    container_name: opnsense-wireguard-config-generator
+    image: ghcr.io/mauckisch/wireforge:latest
+    container_name: wireforge
     restart: unless-stopped
     init: true
 

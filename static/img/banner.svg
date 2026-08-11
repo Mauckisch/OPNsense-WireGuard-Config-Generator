@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
-<title id="title">OPNsense WireGuard Config Generator</title>
-<desc id="desc">Red corporate banner for the OPNsense WireGuard Config Generator project.</desc>
+<title id="title">WireForge</title>
+<desc id="desc">Red corporate banner for WireForge, an OPNsense WireGuard client manager and config generator.</desc>
 <defs>
  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
   <stop stop-color="#240606"/><stop offset=".55" stop-color="#650909"/><stop offset="1" stop-color="#180404"/>
@@ -25,11 +25,11 @@
  <path d="M107 213h33v20h20" fill="none" stroke="#5b0808" stroke-width="6"/>
 </g>
 <line x1="340" y1="70" x2="340" y2="290" stroke="#e63323" stroke-width="2" opacity=".7"/>
-<text x="395" y="135" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="62" font-weight="800">OPNsense</text>
-<text x="395" y="205" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="66" font-weight="800">WIREGUARD</text>
-<text x="398" y="255" fill="#e63323" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="800" letter-spacing="2">CONFIG GENERATOR</text>
-<line x1="398" y1="278" x2="885" y2="278" stroke="#e63323" stroke-width="3"/>
-<text x="398" y="316" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="600" letter-spacing="1.5">SIMPLE • SECURE • SELF-HOSTED</text>
+<text x="395" y="150" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="82" font-weight="800">WIREFORGE</text>
+<text x="398" y="220" fill="#e63323" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="800" letter-spacing="1.2">OPNSENSE WIREGUARD CLIENT MANAGER</text>
+<text x="398" y="262" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700" letter-spacing="1">CONFIG GENERATOR</text>
+<line x1="398" y1="282" x2="885" y2="282" stroke="#e63323" stroke-width="3"/>
+<text x="398" y="320" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="600" letter-spacing="1.5">SIMPLE • SECURE • SELF-HOSTED</text>
 <g fill="none" stroke="#e63323" stroke-width="2" opacity=".6">
  <circle cx="1015" cy="180" r="92"/><circle cx="1015" cy="180" r="55"/>
  <path d="M923 180h184M1015 88v184M950 115l130 130M1080 115 950 245"/>

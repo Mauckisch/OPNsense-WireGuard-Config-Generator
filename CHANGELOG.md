@@ -1,6 +1,37 @@
 # Changelog
 
-All notable changes to the OPNsense WireGuard Config Generator are documented in this file.
+All notable changes to WireForge are documented in this file.
+
+## [4.1.0]
+
+### Rebranding
+
+- Project renamed from **OPNsense WireGuard Config Generator** to **WireForge**
+- New WireForge product name and identity
+- Updated application branding throughout the web interface
+- Updated WireForge logo, favicon and README banner
+- GitHub repository moved to `Mauckisch/WireForge`
+- Docker image moved to `ghcr.io/mauckisch/wireforge`
+- GitHub release titles updated to use the WireForge name
+- Application and Docker container naming updated for WireForge
+- Documentation updated for the new project and image names
+
+### Changed
+
+- Product description updated to:
+  `OPNsense WireGuard Client Manager & Config Generator`
+- README installation, update and local-build examples updated for WireForge
+- Docker Compose production container renamed to `wireforge`
+- Development container renamed to `wireforge-dev`
+- Application API User-Agent updated for WireForge
+- GitHub links in the web interface now point to the WireForge repository
+
+### Compatibility
+
+- Core WireGuard parsing, QR generation and export behavior remains unchanged
+- OPNsense API functionality remains unchanged
+- Existing `/app/data` contents remain compatible
+- Existing installations should retain their persistent data volume when changing to the WireForge image
 
 ## [4.0.0]
 
