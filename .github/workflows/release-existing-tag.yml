@@ -4,17 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing version tag, for example v4.0.0"
+        description: "Existing tag, for example v4.0.0"
         required: true
         type: string
 
+permissions:
+  contents: write
+
 jobs:
   release:
-    name: Create GitHub Release
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
 
     steps:
       - name: Validate tag
@@ -28,54 +27,55 @@ jobs:
           fi
 
       - name: Check out existing tag
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag }}
           fetch-depth: 0
 
-      - name: Build release notes
-        shell: bash
+      - name: Prepare release notes
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          TAG="${{ inputs.tag }}"
-          VERSION="${TAG#v}"
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          import os
+          import re
 
-          awk -v version="${VERSION}" '
-            $0 == "## [" version "]" {
-              found=1
-              next
-            }
+          tag = os.environ["RELEASE_TAG"]
+          version = tag.removeprefix("v")
 
-            found && /^## \[/ {
-              exit
-            }
+          changelog = Path("CHANGELOG.md").read_text()
 
-            found {
-              print
-            }
-          ' CHANGELOG.md > /tmp/release-notes.md
+          pattern = re.compile(
+              rf"^## \[{re.escape(version)}\]\n"
+              rf"(.*?)(?=^## \[|\Z)",
+              re.MULTILINE | re.DOTALL,
+          )
 
-          if ! grep -q '[^[:space:]]' /tmp/release-notes.md; then
-            echo "No CHANGELOG entry found for version ${VERSION}."
-            exit 1
-          fi
+          match = pattern.search(changelog)
 
-          cat /tmp/release-notes.md
+          if not match:
+              raise SystemExit(
+                  f"Changelog section for {version} not found"
+              )
+
+          notes = match.group(1).strip() + "\n"
+
+          Path("RELEASE_NOTES.md").write_text(notes)
+
+          print(
+              f"Prepared release notes for {version}"
+          )
+          PYTHON
 
       - name: Create GitHub Release
         env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          TAG="${{ inputs.tag }}"
-          VERSION="${TAG#v}"
+          VERSION="${RELEASE_TAG#v}"
 
-          if gh release view "${TAG}" >/dev/null 2>&1; then
-            echo "Release ${TAG} already exists."
-            exit 0
-          fi
-
-          gh release create "${TAG}" \
+          gh release create "${RELEASE_TAG}" \
             --title "OPNsense WireGuard Config Generator ${VERSION}" \
-            --notes-file /tmp/release-notes.md \
-            --latest \
+            --notes-file RELEASE_NOTES.md \
             --verify-tag
