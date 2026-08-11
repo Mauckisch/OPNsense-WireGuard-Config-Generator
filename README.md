@@ -4,10 +4,11 @@
 
 # OPNsense WireGuard Config Generator
 
-A small self-hosted web application that processes WireGuard client
-configurations created with the OPNsense WireGuard Peer Generator.
+A self-hosted web application for generating WireGuard client configurations manually or directly from an OPNsense firewall through its API.
 
-It generates:
+Version 4.0.0 adds direct OPNsense WireGuard API integration while retaining the original manual configuration generator.
+
+The application can generate:
 
 - a WireGuard `.conf` client profile
 - a QR code as a PNG image
@@ -29,6 +30,8 @@ ghcr.io/mauckisch/opnsense-wireguard-config-generator
 
 ## Features
 
+### Manual Generator
+
 - Paste a WireGuard configuration into the browser
 - Upload `.conf` or `.txt` files
 - Validate required WireGuard sections and fields
@@ -37,12 +40,150 @@ ghcr.io/mauckisch/opnsense-wireguard-config-generator
 - Download the `.conf` file
 - Download the QR code as PNG
 - Download both files as a ZIP archive
-- No cookies
-- No browser storage
-- No Flask sessions
-- No configuration persistence
+- Full-tunnel or split-tunnel detection
 
-Reloading the page clears all entered data and generated previews.
+### API Generator
+
+When an OPNsense connection is configured, the application can:
+
+- connect directly to the OPNsense WireGuard API
+- discover configured WireGuard server instances
+- list WireGuard clients / peers for the selected server
+- display existing peer information
+- request the next available client tunnel address from OPNsense
+- create new WireGuard clients
+- generate WireGuard client key pairs locally
+- generate an optional preshared key
+- generate `.conf`, QR and ZIP exports for newly created clients
+- regenerate an existing client's WireGuard key pair and export a new configuration
+- delete existing WireGuard clients
+
+### OPNsense Settings
+
+- Configure the OPNsense URL
+- Configure an API key and API secret
+- Enable or disable TLS certificate verification
+- Test the OPNsense connection
+- Persist the connection settings in the Docker data volume
+- Encrypt stored API credentials automatically
+
+The Manual Generator remains available even when no OPNsense connection is configured.
+
+## Important limitation for existing clients
+
+OPNsense stores the public key of a WireGuard client peer, but the client's private key is not available through the WireGuard configuration API.
+
+Therefore, an existing client configuration cannot be reconstructed completely from OPNsense alone.
+
+For an existing peer, **Regenerate & Export** creates a new WireGuard client key pair and replaces the existing public key in OPNsense.
+
+> **Warning:** Regenerating a client immediately invalidates all previous WireGuard configurations for that peer. The newly generated configuration must be imported on the client.
+
+The application requires explicit confirmation before regeneration.
+
+Deleting a client also requires explicit confirmation and makes existing configurations for that peer unusable.
+
+## OPNsense API requirements
+
+### Dedicated API user
+
+A dedicated OPNsense user is recommended for the application.
+
+Generate an API key and API secret for that user.
+
+The required OPNsense privilege is:
+
+```text
+VPN: WireGuard: Configuration
+```
+
+An unrestricted administrator account is not required and should not be used when a dedicated API user can be created.
+
+### Network access
+
+The Docker host/container must be able to reach the OPNsense WebGUI/API address.
+
+For a standard HTTPS OPNsense WebGUI configuration:
+
+```text
+Protocol:     TCP
+Destination: OPNsense WebGUI/API address
+Port:        443
+```
+
+If the OPNsense WebGUI uses a custom HTTPS port, that port must be allowed instead.
+
+If the generator and OPNsense are located in different networks or VLANs, allow the generator host to access the OPNsense management/API address on the configured HTTPS port.
+
+A restrictive firewall rule is recommended:
+
+```text
+Source:      Generator host
+Destination: OPNsense management/API address
+Protocol:    TCP
+Port:        443 or the configured WebGUI HTTPS port
+```
+
+Do not expose the OPNsense WebGUI/API to the public Internet solely for this application.
+
+### TLS verification
+
+TLS certificate verification can be enabled in the OPNsense Settings page.
+
+Disabling certificate verification may be necessary when OPNsense uses a certificate that is not trusted by the container, but this reduces protection against man-in-the-middle attacks.
+
+Use a trusted certificate and keep TLS verification enabled whenever possible.
+
+## API credential security
+
+Saved OPNsense API credentials are encrypted at rest.
+
+The application automatically generates a random encryption key. The administrator does not need to create or remember an encryption password.
+
+Persistent application data is stored under:
+
+```text
+/app/data
+```
+
+The application uses:
+
+```text
+/app/data/.master.key
+/app/data/opnsense.json
+```
+
+The master key and configuration file are created with restrictive file permissions.
+
+The API key and API secret stored in `opnsense.json` are encrypted. Saved API credentials are not returned to the browser.
+
+If the application encryption key is lost, the encrypted credentials cannot be recovered. Configure new OPNsense API credentials instead.
+
+The local encryption protects credentials at rest from simple configuration-file disclosure. It does **not** protect the credentials against an attacker with full root access to the Docker host, because such an attacker can access both the encrypted data and the local encryption key.
+
+Removing the saved OPNsense configuration also removes the associated local master key.
+
+## WireGuard key handling
+
+New WireGuard client key pairs are generated by the application.
+
+The private client key is required to build the new WireGuard client configuration and is returned to the browser as part of that generated configuration.
+
+Generated private client keys are not intentionally persisted by the application.
+
+Normal client-list API responses do not expose preshared keys. They indicate only whether a preshared key is available.
+
+Sensitive API credentials and WireGuard key material are not intentionally written to application logs.
+
+Generated WireGuard configurations and QR codes contain sensitive client credentials and must be protected accordingly.
+
+## Tunnel address assignment
+
+The generator does not independently calculate the next WireGuard client address.
+
+When creating a new client, it requests the next client address from OPNsense immediately before creating the peer.
+
+This leaves address assignment under OPNsense control.
 
 ## Docker Compose installation
 
@@ -62,9 +203,20 @@ services:
     container_name: opnsense-wireguard-config-generator
     restart: unless-stopped
     init: true
+
     ports:
       - "8787:8787"
+
+    volumes:
+      - generator-data:/app/data
+
+volumes:
+  generator-data:
 ```
+
+The persistent volume is required if OPNsense connection settings should survive container recreation.
+
+Do not store OPNsense API credentials directly in `docker-compose.yml`, the Docker image or the Git repository.
 
 Pull the Docker image:
 
@@ -94,14 +246,17 @@ The image can also be downloaded directly:
 docker pull ghcr.io/mauckisch/opnsense-wireguard-config-generator:latest
 ```
 
-Run it without Docker Compose:
+Run it without Docker Compose and with persistent application data:
 
 ```bash
+docker volume create opnsense-wireguard-config-generator-data
+
 docker run -d \
   --name opnsense-wireguard-config-generator \
   --restart unless-stopped \
   --init \
   -p 8787:8787 \
+  -v opnsense-wireguard-config-generator-data:/app/data \
   ghcr.io/mauckisch/opnsense-wireguard-config-generator:latest
 ```
 
@@ -124,6 +279,8 @@ Recreate the container with the new image:
 ```bash
 docker compose up -d
 ```
+
+The persistent `generator-data` volume is retained during a normal container recreation.
 
 Optionally remove unused old images:
 
@@ -158,7 +315,7 @@ Example response:
 ```json
 {
   "status": "ok",
-  "version": "3.0.0"
+  "version": "4.0.0"
 }
 ```
 
@@ -167,6 +324,10 @@ Example response:
 ```bash
 docker compose down
 ```
+
+The named Docker volume is not removed by this command.
+
+Do not use `docker compose down -v` unless you intentionally want to remove the persistent OPNsense configuration and encryption key.
 
 ## Build locally
 
@@ -188,17 +349,20 @@ docker build \
 Run the locally built image:
 
 ```bash
+docker volume create opnsense-wireguard-config-generator-local-data
+
 docker run -d \
   --name opnsense-wireguard-config-generator-local \
   --restart unless-stopped \
   --init \
   -p 8787:8787 \
+  -v opnsense-wireguard-config-generator-local-data:/app/data \
   opnsense-wireguard-config-generator:local
 ```
 
-## Security
+## Security recommendations
 
-WireGuard client configurations contain private keys.
+WireGuard client configurations contain private keys and must be treated as sensitive credentials.
 
 Therefore:
 
@@ -206,10 +370,17 @@ Therefore:
 - do not commit client configurations to Git
 - do not store generated QR codes publicly
 - protect backups containing WireGuard profiles
+- use a dedicated least-privilege OPNsense API user
+- restrict OPNsense API network access to the generator host where possible
+- use HTTPS for the OPNsense API
+- keep TLS certificate verification enabled whenever possible
+- protect the Docker host and persistent application volume
 - remove or disable compromised peers in OPNsense
-- expose the application only to trusted networks
+- expose the generator web interface only to trusted networks
 
-The application does not intentionally store submitted configurations.
+The application does not intentionally persist submitted or generated WireGuard client configurations.
+
+OPNsense connection settings are intentionally persisted when configured. API credentials within those settings are encrypted at rest.
 
 ## License
 

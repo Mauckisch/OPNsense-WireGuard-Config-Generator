@@ -40,12 +40,31 @@
       <nav class="sidebar-nav" aria-label="Main navigation">
 
         <button
+          id="manualNavButton"
           class="sidebar-nav-item active"
           type="button"
           aria-current="page"
         >
           <span class="sidebar-nav-icon" aria-hidden="true">⌘</span>
-          <span>Generator</span>
+          <span>Manual Generator</span>
+        </button>
+
+        <button
+          id="apiGeneratorNavButton"
+          class="sidebar-nav-item"
+          type="button"
+        >
+          <span class="sidebar-nav-icon" aria-hidden="true">⇄</span>
+          <span>API Generator</span>
+        </button>
+
+        <button
+          id="opnsenseSettingsNavButton"
+          class="sidebar-nav-item"
+          type="button"
+        >
+          <span class="sidebar-nav-icon" aria-hidden="true">⚙</span>
+          <span>OPNsense Settings</span>
         </button>
 
       </nav>
@@ -84,6 +103,11 @@
 
       <!-- Main content -->
       <main class="main-content">
+
+        <section
+          id="manualView"
+          class="app-view"
+        >
 
         <div class="page-heading">
           <div>
@@ -315,9 +339,818 @@ PersistentKeepalive = 25"
 
         </div>
 
+        </section>
+
+
+        <!-- API Generator -->
+        <section
+          id="apiGeneratorView"
+          class="app-view"
+          hidden
+        >
+
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">WIREGUARD FROM OPNSENSE</p>
+
+              <h1>API Generator</h1>
+
+              <p class="subtitle">
+                Select WireGuard data directly from a configured OPNsense firewall
+                and generate a client profile, QR code or ZIP package.
+              </p>
+            </div>
+          </div>
+
+          <section class="api-state-card card">
+
+            <div class="api-state-icon" aria-hidden="true">
+              ⇄
+            </div>
+
+            <div class="api-state-content">
+
+              <div class="section-heading">
+                <div>
+                  <p class="section-kicker">
+                    OPNSENSE CONNECTION
+                  </p>
+
+                  <h2>
+                    WireGuard source
+                  </h2>
+                </div>
+
+                <button
+                  id="apiGeneratorRefreshButton"
+                  class="ghost-button"
+                  type="button"
+                >
+                  Refresh
+                </button>
+              </div>
+
+              <div
+                id="apiGeneratorMessage"
+                class="message neutral"
+              >
+                Checking saved OPNsense connection...
+              </div>
+
+              <div class="api-state-details">
+
+                <div>
+                  <span>OPNsense</span>
+                  <strong
+                    id="apiGeneratorConnectionStatus"
+                    class="api-status-offline"
+                  >
+                    Checking
+                  </strong>
+                </div>
+
+                <div>
+                  <span>WireGuard API</span>
+                  <strong id="apiGeneratorWireguardStatus">
+                    Checking
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Servers</span>
+                  <strong id="apiGeneratorServerCount">
+                    —
+                  </strong>
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <section
+            id="apiServerCard"
+            class="card api-server-card"
+            hidden
+          >
+
+            <div class="section-heading">
+
+              <div>
+                <p class="section-kicker">
+                  WIREGUARD INSTANCE
+                </p>
+
+                <h2>
+                  Select server
+                </h2>
+              </div>
+
+              <button
+                id="apiCreateClientButton"
+                class="download-button primary api-create-action"
+                type="button"
+                disabled
+              >
+                Create new client
+              </button>
+
+            </div>
+
+            <label
+              class="field-label"
+              for="apiServerSelect"
+            >
+              WireGuard server / instance
+            </label>
+
+            <select
+              id="apiServerSelect"
+              class="text-input api-select"
+            >
+              <option value="">
+                Select a WireGuard server
+              </option>
+            </select>
+
+            <div
+              id="apiClientSection"
+              class="api-client-section"
+              hidden
+            >
+
+              <label
+                class="field-label"
+                for="apiClientSelect"
+              >
+                WireGuard client / peer
+              </label>
+
+              <select
+                id="apiClientSelect"
+                class="text-input api-select"
+              >
+                <option value="">
+                  Select a WireGuard client
+                </option>
+              </select>
+
+              <div
+                id="apiClientMessage"
+                class="message neutral"
+              >
+                Select a server to load clients.
+              </div>
+
+              <div
+                id="apiPeerDetails"
+                class="api-peer-details"
+                hidden
+              >
+
+                <div class="api-peer-grid">
+
+                  <div>
+                    <span>Client</span>
+                    <strong id="apiPeerName">—</strong>
+                  </div>
+
+                  <div>
+                    <span>Tunnel address</span>
+                    <strong id="apiPeerAddress">—</strong>
+                  </div>
+
+                  <div>
+                    <span>Endpoint</span>
+                    <strong id="apiPeerEndpoint">—</strong>
+                  </div>
+
+                  <div>
+                    <span>DNS</span>
+                    <strong id="apiPeerDns">—</strong>
+                  </div>
+
+                  <div>
+                    <span>Preshared key</span>
+                    <strong id="apiPeerPsk">—</strong>
+                  </div>
+
+                  <div>
+                    <span>Client private key</span>
+                    <strong
+                      id="apiPeerPrivateKey"
+                      class="api-status-offline"
+                    >
+                      Unavailable
+                    </strong>
+                  </div>
+
+                </div>
+
+                <div class="api-export-warning">
+                  <strong>Existing configuration cannot be reconstructed.</strong>
+                  <span>
+                    Regenerating replaces the client's WireGuard public key
+                    in OPNsense. All previous configurations for this peer
+                    will immediately become invalid.
+                  </span>
+                </div>
+
+                <label
+                  class="field-label"
+                  for="apiAllowedIps"
+                >
+                  Allowed IPs for regenerated client
+                </label>
+
+                <input
+                  id="apiAllowedIps"
+                  class="text-input"
+                  type="text"
+                  value="0.0.0.0/0,::/0"
+                  spellcheck="false"
+                >
+
+                <div class="api-peer-actions">
+
+                  <button
+                    id="apiRegenerateButton"
+                    class="download-button primary api-danger-action"
+                    type="button"
+                  >
+                    Regenerate &amp; Export
+                  </button>
+
+                  <button
+                    id="apiDeleteButton"
+                    class="download-button api-delete-action"
+                    type="button"
+                  >
+                    Delete client
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </section>
+
+
+        <!-- OPNsense Settings -->
+        <section
+          id="opnsenseSettingsView"
+          class="app-view"
+          hidden
+        >
+
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">OPNSENSE CONNECTION</p>
+
+              <h1>OPNsense Settings</h1>
+
+              <p class="subtitle">
+                Configure and test the connection used by the API Generator.
+                Connection credentials are managed independently from client exports.
+              </p>
+            </div>
+          </div>
+
+
+          <section class="api-state-card card">
+
+            <div class="api-state-icon" aria-hidden="true">
+              !
+            </div>
+
+            <div class="api-state-content">
+
+              <p class="section-kicker">
+                OPNSENSE CONNECTION
+              </p>
+
+              <h2>
+                Connect to OPNsense
+              </h2>
+
+              <p class="api-state-description">
+                Enter the URL and API credentials of an OPNsense firewall.
+                The Manual Generator remains fully available when no
+                OPNsense connection is configured.
+              </p>
+
+              <div class="api-form">
+
+                <label class="field-label" for="opnsenseUrl">
+                  OPNsense URL
+                </label>
+
+                <input
+                  id="opnsenseUrl"
+                  class="text-input"
+                  type="url"
+                  autocomplete="off"
+                  placeholder="https://firewall.example.local"
+                >
+
+                <label class="field-label" for="opnsenseApiKey">
+                  API key
+                </label>
+
+                <input
+                  id="opnsenseApiKey"
+                  class="text-input"
+                  type="text"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder="API key"
+                >
+
+                <label class="field-label" for="opnsenseApiSecret">
+                  API secret
+                </label>
+
+                <input
+                  id="opnsenseApiSecret"
+                  class="text-input"
+                  type="password"
+                  autocomplete="new-password"
+                  spellcheck="false"
+                  placeholder="API secret"
+                >
+
+                <label class="api-checkbox">
+                  <input
+                    id="opnsenseVerifyTls"
+                    type="checkbox"
+                    checked
+                  >
+                  <span>Verify TLS certificate</span>
+                </label>
+
+                <div class="api-form-actions">
+
+                  <button
+                    id="opnsenseTestButton"
+                    class="download-button api-connect-button"
+                    type="button"
+                  >
+                    Test connection
+                  </button>
+
+                  <button
+                    id="opnsenseSaveButton"
+                    class="download-button primary api-connect-button"
+                    type="button"
+                    disabled
+                  >
+                    Save configuration
+                  </button>
+
+                  <button
+                    id="opnsenseRemoveButton"
+                    class="download-button api-remove-button"
+                    type="button"
+                    hidden
+                  >
+                    Remove configuration
+                  </button>
+
+                </div>
+
+              </div>
+
+              <div
+                id="opnsenseConnectionMessage"
+                class="message neutral"
+              >
+                No OPNsense connection configured.
+              </div>
+
+              <div class="api-state-details">
+
+                <div>
+                  <span>Status</span>
+                  <strong
+                    id="opnsenseConnectionStatus"
+                    class="api-status-offline"
+                  >
+                    Not connected
+                  </strong>
+                </div>
+
+                <div>
+                  <span>OPNsense host</span>
+                  <strong id="opnsenseConnectionHost">
+                    Not configured
+                  </strong>
+                </div>
+
+                <div>
+                  <span>WireGuard API</span>
+                  <strong id="opnsenseWireguardStatus">
+                    Not checked
+                  </strong>
+                </div>
+
+              </div>
+
+              <p class="api-state-note">
+                Saved credentials are stored only on the server inside the
+                persistent application data volume. API secrets are never
+                returned to the browser after they have been saved.
+              </p>
+
+            </div>
+
+          </section>
+
+        </section>
+
       </main>
 
     </div>
+
+  </div>
+
+
+  <!-- Create client modal -->
+  <div
+    id="createClientModal"
+    class="modal-backdrop"
+    hidden
+  >
+
+    <section
+      class="about-modal create-client-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="createClientTitle"
+    >
+
+      <header class="about-modal-header">
+
+        <strong>
+          Create WireGuard Client
+        </strong>
+
+        <button
+          id="createClientCloseX"
+          class="modal-close-x"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+      </header>
+
+
+      <div class="about-modal-body">
+
+        <h2 id="createClientTitle">
+          New client
+        </h2>
+
+        <p class="regenerate-warning-text">
+          A new WireGuard key pair will be generated locally.
+          Only the public key and peer configuration are stored in OPNsense.
+        </p>
+
+        <div class="api-create-form">
+
+          <label
+            class="field-label"
+            for="createClientName"
+          >
+            Client name
+          </label>
+
+          <input
+            id="createClientName"
+            class="text-input"
+            type="text"
+            autocomplete="off"
+            placeholder="e.g. MacBook-Pro"
+          >
+
+
+          <label
+            class="field-label"
+            for="createClientAddress"
+          >
+            Tunnel address
+          </label>
+
+          <input
+            id="createClientAddress"
+            class="text-input"
+            type="text"
+            readonly
+            value="Assigned by OPNsense"
+          >
+
+
+          <label
+            class="field-label"
+            for="createAllowedIps"
+          >
+            Allowed IPs
+          </label>
+
+          <input
+            id="createAllowedIps"
+            class="text-input"
+            type="text"
+            spellcheck="false"
+            value="0.0.0.0/0,::/0"
+          >
+
+
+          <label
+            class="field-label"
+            for="createKeepalive"
+          >
+            Persistent keepalive
+          </label>
+
+          <input
+            id="createKeepalive"
+            class="text-input"
+            type="number"
+            min="0"
+            max="65535"
+            value="25"
+          >
+
+
+          <label class="api-checkbox">
+
+            <input
+              id="createUsePsk"
+              type="checkbox"
+              checked
+            >
+
+            <span>
+              Generate a preshared key
+            </span>
+
+          </label>
+
+        </div>
+
+        <div
+          id="createClientMessage"
+          class="message neutral"
+        >
+          OPNsense will assign the next available tunnel address
+          when the client is created.
+        </div>
+
+      </div>
+
+
+      <footer class="about-modal-footer">
+
+        <button
+          id="createClientCancelButton"
+          class="about-github-button"
+          type="button"
+        >
+          Cancel
+        </button>
+
+        <button
+          id="createClientConfirmButton"
+          class="about-close-button"
+          type="button"
+        >
+          Create &amp; Export
+        </button>
+
+      </footer>
+
+    </section>
+
+  </div>
+
+
+  <!-- Delete client confirmation modal -->
+  <div
+    id="deleteClientModal"
+    class="modal-backdrop"
+    hidden
+  >
+
+    <section
+      class="about-modal delete-client-modal"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="deleteClientTitle"
+      aria-describedby="deleteClientDescription"
+    >
+
+      <header class="about-modal-header">
+
+        <strong>
+          Delete WireGuard Client
+        </strong>
+
+        <button
+          id="deleteClientCloseX"
+          class="modal-close-x"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+      </header>
+
+
+      <div class="about-modal-body">
+
+        <div class="regenerate-warning-icon" aria-hidden="true">
+          !
+        </div>
+
+        <h2 id="deleteClientTitle">
+          This WireGuard client will be permanently deleted
+        </h2>
+
+        <p
+          id="deleteClientDescription"
+          class="regenerate-warning-text"
+        >
+          The selected peer will be removed from OPNsense.
+        </p>
+
+        <div class="delete-danger-box">
+
+          <strong>
+            This action cannot be undone.
+          </strong>
+
+          <span>
+            Existing WireGuard configurations for this client will stop
+            working because the peer will no longer exist on OPNsense.
+          </span>
+
+          <span>
+            To use this device again, a new WireGuard client must be
+            created and configured.
+          </span>
+
+        </div>
+
+        <div class="regenerate-target">
+
+          <span>Client to delete</span>
+
+          <strong id="deleteClientName">
+            —
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <footer class="about-modal-footer">
+
+        <button
+          id="deleteClientCancelButton"
+          class="about-github-button"
+          type="button"
+        >
+          Cancel
+        </button>
+
+        <button
+          id="deleteClientConfirmButton"
+          class="delete-confirm-button"
+          type="button"
+        >
+          Yes, delete client
+        </button>
+
+      </footer>
+
+    </section>
+
+  </div>
+
+
+  <!-- Regenerate confirmation modal -->
+  <div
+    id="regenerateModal"
+    class="modal-backdrop"
+    hidden
+  >
+
+    <section
+      class="about-modal regenerate-modal"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="regenerateTitle"
+      aria-describedby="regenerateDescription"
+    >
+
+      <header class="about-modal-header">
+
+        <strong>
+          Regenerate WireGuard Client
+        </strong>
+
+        <button
+          id="regenerateCloseX"
+          class="modal-close-x"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+      </header>
+
+
+      <div class="about-modal-body">
+
+        <div class="regenerate-warning-icon" aria-hidden="true">
+          !
+        </div>
+
+        <h2 id="regenerateTitle">
+          Existing client configurations will stop working
+        </h2>
+
+        <p
+          id="regenerateDescription"
+          class="regenerate-warning-text"
+        >
+          Regenerating this client creates a new WireGuard key pair and
+          replaces the existing client public key in OPNsense.
+        </p>
+
+        <div class="regenerate-danger-box">
+
+          <strong>
+            This action invalidates all previous configurations for this client.
+          </strong>
+
+          <span>
+            Any device currently using the old configuration will lose its
+            WireGuard connection after the change is applied.
+          </span>
+
+          <span>
+            You must import the newly generated configuration on the client
+            after regeneration.
+          </span>
+
+        </div>
+
+        <div class="regenerate-target">
+
+          <span>Selected client</span>
+
+          <strong id="regenerateClientName">
+            —
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <footer class="about-modal-footer">
+
+        <button
+          id="regenerateCancelButton"
+          class="about-github-button"
+          type="button"
+        >
+          Cancel
+        </button>
+
+        <button
+          id="regenerateConfirmButton"
+          class="regenerate-confirm-button"
+          type="button"
+        >
+          Yes, regenerate &amp; export
+        </button>
+
+      </footer>
+
+    </section>
 
   </div>
 
@@ -374,7 +1207,7 @@ PersistentKeepalive = 25"
             </span>
 
             <p>
-              WireGuard Client Configuration Tool
+              Manual + OPNsense API Configuration Tool
             </p>
           </div>
 
@@ -399,6 +1232,21 @@ PersistentKeepalive = 25"
           </div>
 
           <div class="about-detail">
+            <span>Integration</span>
+            <strong>OPNsense WireGuard API</strong>
+          </div>
+
+          <div class="about-detail">
+            <span>Security</span>
+            <strong>Encrypted API Credentials</strong>
+          </div>
+
+          <div class="about-detail">
+            <span>Deployment</span>
+            <strong>Docker + Persistent Data Volume</strong>
+          </div>
+
+          <div class="about-detail about-detail-wide">
             <span>Project</span>
             <strong>OPNsense WireGuard Config Generator</strong>
           </div>

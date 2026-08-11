@@ -7,3 +7,9 @@ services:
 
     ports:
       - "8787:8787"
+
+    volumes:
+      - generator-data:/app/data
+
+volumes:
+  generator-data:
