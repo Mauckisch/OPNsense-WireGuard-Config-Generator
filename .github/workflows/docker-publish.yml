@@ -12,11 +12,6 @@ on:
       - main
 
   workflow_dispatch:
-    inputs:
-      release_tag:
-        description: "Existing tag to create/update a GitHub Release for, e.g. v4.0.0. Leave empty for a normal manual Docker build."
-        required: false
-        type: string
 
 env:
   REGISTRY: ghcr.io
@@ -26,10 +21,6 @@ jobs:
   docker:
     name: Build Docker image
     runs-on: ubuntu-latest
-
-    # A manual run with release_tag is release-only.
-    # This avoids rebuilding an already published version such as v4.0.0.
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.release_tag == '' }}
 
     permissions:
       contents: read
@@ -80,65 +71,34 @@ jobs:
 
   release:
     name: Create GitHub Release
-    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     needs:
       - docker
-
-    # Run automatically for version tags.
-    # Also allow release-only manual runs for an existing tag.
-    if: >-
-      ${{
-        always() &&
-        (
-          startsWith(github.ref, 'refs/tags/v') ||
-          (
-            github.event_name == 'workflow_dispatch' &&
-            inputs.release_tag != ''
-          )
-        ) &&
-        (
-          needs.docker.result == 'success' ||
-          needs.docker.result == 'skipped'
-        )
-      }}
+    runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
     steps:
-      - name: Resolve release tag
-        id: release
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Extract version
+        id: version
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            TAG="${{ inputs.release_tag }}"
-          else
-            TAG="${GITHUB_REF_NAME}"
-          fi
-
-          if [[ ! "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid release tag: ${TAG}"
-            exit 1
-          fi
-
+          TAG="${GITHUB_REF_NAME}"
           VERSION="${TAG#v}"
 
           echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
 
-          echo "Release tag: ${TAG}"
-          echo "Version: ${VERSION}"
-
-      - name: Check out release tag
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ steps.release.outputs.tag }}
-          fetch-depth: 0
-
       - name: Build release notes from CHANGELOG
         shell: bash
         run: |
-          VERSION="${{ steps.release.outputs.version }}"
+          VERSION="${{ steps.version.outputs.version }}"
 
           awk -v version="${VERSION}" '
             $0 == "## [" version "]" {
@@ -160,31 +120,18 @@ jobs:
             exit 1
           fi
 
-          echo "===== RELEASE NOTES ====="
           cat /tmp/release-notes.md
 
-      - name: Create or update GitHub Release
+      - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          TAG="${{ steps.release.outputs.tag }}"
-          VERSION="${{ steps.release.outputs.version }}"
-          TITLE="OPNsense WireGuard Config Generator ${VERSION}"
+          TAG="${{ steps.version.outputs.tag }}"
+          VERSION="${{ steps.version.outputs.version }}"
 
-          if gh release view "${TAG}" >/dev/null 2>&1; then
-            echo "Release ${TAG} already exists. Updating it."
-
-            gh release edit "${TAG}" \
-              --title "${TITLE}" \
-              --notes-file /tmp/release-notes.md \
-              --latest
-          else
-            echo "Creating release ${TAG}."
-
-            gh release create "${TAG}" \
-              --title "${TITLE}" \
-              --notes-file /tmp/release-notes.md \
-              --latest \
-              --verify-tag
-          fi
+          gh release create "${TAG}" \
+            --title "OPNsense WireGuard Config Generator ${VERSION}" \
+            --notes-file /tmp/release-notes.md \
+            --latest \
+            --verify-tag
