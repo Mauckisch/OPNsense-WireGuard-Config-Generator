@@ -2,6 +2,19 @@
 
 All notable changes to WireForge are documented in this file.
 
+## [4.1.2]
+
+### Fixed
+
+- Fixed OPNsense Settings connection-state handling for saved configurations.
+- Saved OPNsense connections are now checked automatically when the page loads.
+- Connection status now reports the actual state as `Connected`, `Unavailable`, or `Checking` instead of using `Saved` as a connection state.
+- WireGuard API availability is now checked automatically for saved configurations.
+- Fixed misleading `Not checked` WireGuard API status after loading an already configured OPNsense connection.
+- Fixed connection testing with previously saved encrypted API credentials.
+- WireGuard API and OPNsense connection states now use consistent success and error styling.
+- Updated the sidebar footer so the WireForge version is displayed on the same line as the product name.
+
 ## [4.1.1]
 
 ### Fixed

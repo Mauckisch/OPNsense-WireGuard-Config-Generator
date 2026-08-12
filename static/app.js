@@ -749,6 +749,7 @@
     message = "No OPNsense connection configured.",
     state = "neutral",
     connected = false,
+    wireguardAvailable = null,
   } = {}) {
     opnsenseConnectionStatus.textContent = status;
     opnsenseConnectionHost.textContent = host;
@@ -756,6 +757,14 @@
 
     opnsenseConnectionStatus.className =
       connected ? "api-status-online" : "api-status-offline";
+
+    if (wireguardAvailable === true) {
+      opnsenseWireguardStatus.className = "api-status-online";
+    } else if (wireguardAvailable === false) {
+      opnsenseWireguardStatus.className = "api-status-offline";
+    } else {
+      opnsenseWireguardStatus.className = "";
+    }
 
     opnsenseConnectionMessage.textContent = message;
     opnsenseConnectionMessage.className = `message ${state}`;
@@ -771,8 +780,11 @@
 
       const result = await response.json();
 
-      if (!result.configured) {
+      if (!response.ok || !result.configured) {
         opnsenseRemoveButton.hidden = true;
+        opnsenseSaveButton.disabled = true;
+
+        setOpnsenseConnectionState();
         return;
       }
 
@@ -788,18 +800,93 @@
       opnsenseRemoveButton.hidden = false;
       opnsenseSaveButton.disabled = true;
 
+      /*
+       * A saved configuration exists, but "saved" does not mean
+       * that OPNsense is currently reachable. Verify the real
+       * connection state automatically on page load.
+       */
       setOpnsenseConnectionState({
         host: result.url || "Configured",
-        status: "Saved",
-        wireguard: "Not checked",
-        message: "A saved OPNsense configuration is available.",
+        status: "Checking",
+        wireguard: "Checking",
+        message: "Checking saved OPNsense connection...",
         state: "neutral",
+        connected: false,
+        wireguardAvailable: null,
+      });
+
+      const statusResponse = await fetch(
+        "/api/opnsense/status",
+        {cache: "no-store"},
+      );
+
+      const statusResult = await statusResponse.json();
+
+      if (!statusResponse.ok || !statusResult.connected) {
+        setOpnsenseConnectionState({
+          host: result.url || "Configured",
+          status: "Unavailable",
+          wireguard: "Unavailable",
+          message:
+            statusResult.error ||
+            "The saved OPNsense connection is currently unavailable.",
+          state: "error",
+          connected: false,
+          wireguardAvailable: false,
+        });
+
+        return;
+      }
+
+      const wireguardResponse = await fetch(
+        "/api/opnsense/servers",
+        {cache: "no-store"},
+      );
+
+      const wireguardResult = await wireguardResponse.json();
+
+      if (!wireguardResponse.ok || !wireguardResult.connected) {
+        setOpnsenseConnectionState({
+          host:
+            statusResult.url ||
+            result.url ||
+            "Configured",
+          status: "Connected",
+          wireguard: "Unavailable",
+          message:
+            wireguardResult.error ||
+            "OPNsense is connected, but the WireGuard API is unavailable.",
+          state: "error",
+          connected: true,
+          wireguardAvailable: false,
+        });
+
+        return;
+      }
+
+      setOpnsenseConnectionState({
+        host:
+          statusResult.url ||
+          result.url ||
+          "Configured",
+        status: "Connected",
+        wireguard: "Available",
+        message:
+          "Saved OPNsense configuration is connected and available.",
+        state: "success",
+        connected: true,
+        wireguardAvailable: true,
       });
 
     } catch (_) {
       setOpnsenseConnectionState({
-        message: "Saved OPNsense configuration could not be loaded.",
+        status: "Unavailable",
+        wireguard: "Unavailable",
+        message:
+          "Saved OPNsense configuration could not be checked.",
         state: "error",
+        connected: false,
+        wireguardAvailable: false,
       });
     }
   }
@@ -858,11 +945,12 @@
 
       setOpnsenseConnectionState({
         host: result.url || url,
-        status: "Saved",
+        status: "Connected",
         wireguard: "Available",
-        message: "OPNsense configuration was saved successfully.",
+        message: "OPNsense configuration was saved successfully and is connected.",
         state: "success",
         connected: true,
+        wireguardAvailable: true,
       });
 
     } catch (_) {
@@ -930,15 +1018,6 @@
       return;
     }
 
-    if (!apiKey || !apiSecret) {
-      setOpnsenseConnectionState({
-        host: url,
-        message: "API key and API secret are required.",
-        state: "error",
-      });
-      return;
-    }
-
     opnsenseTestButton.disabled = true;
     opnsenseTestButton.textContent = "Testing...";
 
@@ -951,6 +1030,103 @@
     });
 
     try {
+
+      /*
+       * No credentials entered:
+       * test the already saved encrypted server-side configuration.
+       */
+      if (!apiKey && !apiSecret) {
+        const configResponse = await fetch(
+          "/api/opnsense/config",
+          {cache: "no-store"},
+        );
+
+        const configResult = await configResponse.json();
+
+        if (!configResult.configured) {
+          setOpnsenseConnectionState({
+            host: url,
+            status: "Not connected",
+            wireguard: "Not checked",
+            message: "API key and API secret are required.",
+            state: "error",
+          });
+          return;
+        }
+
+        const statusResponse = await fetch(
+          "/api/opnsense/status",
+          {cache: "no-store"},
+        );
+
+        const statusResult = await statusResponse.json();
+
+        if (!statusResponse.ok || !statusResult.connected) {
+          setOpnsenseConnectionState({
+            host: url,
+            status: "Not connected",
+            wireguard: "Unavailable",
+            message:
+              statusResult.error ||
+              "Could not connect using the saved OPNsense configuration.",
+            state: "error",
+            connected: false,
+            wireguardAvailable: false,
+          });
+          return;
+        }
+
+        const wireguardResponse = await fetch(
+          "/api/opnsense/servers",
+          {cache: "no-store"},
+        );
+
+        const wireguardResult = await wireguardResponse.json();
+
+        if (!wireguardResponse.ok || !wireguardResult.connected) {
+          setOpnsenseConnectionState({
+            host: statusResult.url || url,
+            status: "Connected",
+            wireguard: "Unavailable",
+            message: "OPNsense is connected, but the WireGuard API is unavailable.",
+            state: "error",
+            connected: true,
+            wireguardAvailable: false,
+          });
+          return;
+        }
+
+        setOpnsenseConnectionState({
+          host: statusResult.url || url,
+          status: "Connected",
+          wireguard: "Available",
+          message: "Connection to OPNsense and the WireGuard API was successful.",
+          state: "success",
+          connected: true,
+          wireguardAvailable: true,
+        });
+
+        return;
+      }
+
+      /*
+       * Only one credential was entered.
+       */
+      if (!apiKey || !apiSecret) {
+        setOpnsenseConnectionState({
+          host: url,
+          status: "Not connected",
+          wireguard: "Not checked",
+          message: "Enter both API key and API secret, or leave both empty to test the saved configuration.",
+          state: "error",
+        });
+        return;
+      }
+
+      /*
+       * New credentials entered:
+       * test them before allowing them to be saved.
+       */
       const response = await fetch("/api/opnsense/test", {
         method: "POST",
         headers: {
@@ -974,6 +1150,7 @@
           wireguard: "Unavailable",
           message: result.error || "Could not connect to OPNsense.",
           state: "error",
+          wireguardAvailable: false,
         });
         return;
       }
@@ -988,6 +1165,7 @@
         message: "Connection to OPNsense was successful. The configuration can now be saved.",
         state: "success",
         connected: true,
+        wireguardAvailable: true,
       });
 
     } catch (_) {
@@ -997,6 +1175,8 @@
         wireguard: "Unavailable",
         message: "The connection test could not be completed.",
         state: "error",
+        connected: false,
+        wireguardAvailable: false,
       });
 
     } finally {
@@ -1004,6 +1184,7 @@
       opnsenseTestButton.textContent = "Test connection";
     }
   }
+
 
   opnsenseTestButton.addEventListener(
     "click",
