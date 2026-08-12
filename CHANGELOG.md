@@ -2,6 +2,16 @@
 
 All notable changes to WireForge are documented in this file.
 
+## [4.1.1]
+
+### Fixed
+
+- Fixed persistent storage for saved OPNsense connection settings
+- Added a fixed Docker volume name `wireforge-data`
+- OPNsense API credentials and the local encryption key now survive container recreation and rebuilds
+- Development and production Compose configurations now mount `/app/data` persistently
+- Prevented loss of `opnsense.json` and `.master.key` during `docker compose down` followed by rebuild/start
+
 ## [4.1.0]
 
 ### Rebranding
