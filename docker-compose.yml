@@ -9,7 +9,8 @@ services:
       - "8787:8787"
 
     volumes:
-      - generator-data:/app/data
+      - wireforge-data:/app/data
 
 volumes:
-  generator-data:
+  wireforge-data:
+    name: wireforge-data

@@ -32,9 +32,9 @@ MASTER_KEY_FILE = DATA_DIR / ".master.key"
 
 def get_version() -> str:
     try:
-        return VERSION_FILE.read_text(encoding="utf-8").strip() or "4.1.0"
+        return VERSION_FILE.read_text(encoding="utf-8").strip() or "4.1.1"
     except OSError:
-        return "4.1.0"
+        return "4.1.1"
 
 
 def generate_wireguard_keypair() -> tuple[str, str]:
