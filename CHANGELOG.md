@@ -2,6 +2,25 @@
 
 All notable changes to WireForge are documented in this file.
 
+## [4.2.0]
+
+### Added
+
+- Added QR code import to the Manual Generator.
+- Added a dedicated second drag-and-drop area for WireGuard QR code images.
+- Added support for PNG, JPG, JPEG and WebP QR code uploads.
+- Added server-side QR decoding using OpenCV.
+- Imported QR codes are converted back into the complete WireGuard client configuration.
+- QR-imported configurations are passed through the existing WireGuard validation, summary, preview and export workflow.
+- Added an 8 MB upload limit for QR code images.
+- QR images are processed in memory and are not intentionally persisted by WireForge.
+
+### Changed
+
+- Manual Generator now provides separate upload areas for configuration files and QR code images.
+- Existing `.conf` and `.txt` upload behavior remains unchanged.
+- Added `opencv-python-headless` and NumPy runtime dependencies for QR decoding.
+
 ## [4.1.2]
 
 ### Fixed

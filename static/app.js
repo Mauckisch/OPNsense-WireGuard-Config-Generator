@@ -5,6 +5,8 @@
   const configInput = document.querySelector("#config");
   const fileInput = document.querySelector("#fileInput");
   const dropZone = document.querySelector("#dropZone");
+  const qrFileInput = document.querySelector("#qrFileInput");
+  const qrDropZone = document.querySelector("#qrDropZone");
   const clearButton = document.querySelector("#clearButton");
   const message = document.querySelector("#message");
   const statusPill = document.querySelector("#statusPill");
@@ -141,6 +143,7 @@
     deviceInput.value = "";
     configInput.value = "";
     fileInput.value = "";
+    qrFileInput.value = "";
     updateSummary();
     clearQr();
     setDownloads(false);
@@ -227,6 +230,85 @@
 
     scheduleParse();
   }
+
+  async function loadQrFile(file) {
+    if (!file) return;
+
+    const allowedTypes = [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setStatus("Invalid", "invalid");
+      setMessage(
+        "Unsupported QR image type. Use PNG, JPG, JPEG or WebP.",
+        "error",
+      );
+      qrFileInput.value = "";
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      setStatus("Invalid", "invalid");
+      setMessage(
+        "QR code image is too large. Maximum size is 8 MB.",
+        "error",
+      );
+      qrFileInput.value = "";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setStatus("Reading QR", "neutral");
+    setMessage("Reading WireGuard QR code...", "neutral");
+
+    try {
+      const response = await fetch("/api/qr/decode", {
+        method: "POST",
+        body: formData,
+        cache: "no-store",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.decoded) {
+        setStatus("Invalid", "invalid");
+        setMessage(
+          result.error || "The QR code could not be decoded.",
+          "error",
+        );
+        return;
+      }
+
+      configInput.value = result.config || "";
+
+      if (!deviceInput.value.trim()) {
+        deviceInput.value = file.name.replace(
+          /\.(png|jpe?g|webp)$/i,
+          "",
+        );
+      }
+
+      setMessage(
+        "WireGuard configuration imported successfully from QR code.",
+        "success",
+      );
+
+      scheduleParse();
+
+    } catch (_) {
+      setStatus("Error", "invalid");
+      setMessage(
+        "The QR code image could not be processed.",
+        "error",
+      );
+    }
+  }
+
 
   async function download(kind) {
     const response = await fetch(`/download/${kind}`, {
@@ -1704,6 +1786,39 @@
 
   dropZone.addEventListener("drop", event => loadFile(event.dataTransfer.files[0]));
   fileInput.addEventListener("change", () => loadFile(fileInput.files[0]));
+
+  qrDropZone.addEventListener("click", () => qrFileInput.click());
+
+  qrDropZone.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      qrFileInput.click();
+    }
+  });
+
+  ["dragenter", "dragover"].forEach(type => {
+    qrDropZone.addEventListener(type, event => {
+      event.preventDefault();
+      qrDropZone.classList.add("dragover");
+    });
+  });
+
+  ["dragleave", "drop"].forEach(type => {
+    qrDropZone.addEventListener(type, event => {
+      event.preventDefault();
+      qrDropZone.classList.remove("dragover");
+    });
+  });
+
+  qrDropZone.addEventListener(
+    "drop",
+    event => loadQrFile(event.dataTransfer.files[0]),
+  );
+
+  qrFileInput.addEventListener(
+    "change",
+    () => loadQrFile(qrFileInput.files[0]),
+  );
   configInput.addEventListener("input", scheduleParse);
   deviceInput.addEventListener("input", scheduleParse);
   clearButton.addEventListener("click", resetPage);

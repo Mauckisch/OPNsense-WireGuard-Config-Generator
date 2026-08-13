@@ -12,6 +12,8 @@ import zipfile
 from base64 import b64encode
 from pathlib import Path
 
+import cv2
+import numpy as np
 import qrcode
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.primitives import serialization
@@ -32,9 +34,9 @@ MASTER_KEY_FILE = DATA_DIR / ".master.key"
 
 def get_version() -> str:
     try:
-        return VERSION_FILE.read_text(encoding="utf-8").strip() or "4.1.2"
+        return VERSION_FILE.read_text(encoding="utf-8").strip() or "4.2.0"
     except OSError:
-        return "4.1.2"
+        return "4.2.0"
 
 
 def generate_wireguard_keypair() -> tuple[str, str]:
@@ -1494,6 +1496,90 @@ def parse_config():
         "valid": True,
         "errors": [],
         "summary": config_summary(config, device),
+    })
+
+
+@app.post("/api/qr/decode")
+def qr_decode():
+    uploaded = request.files.get("file")
+
+    if uploaded is None or not uploaded.filename:
+        return jsonify({
+            "decoded": False,
+            "error": "No QR code image was uploaded.",
+        }), 400
+
+    allowed_types = {
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+    }
+
+    if uploaded.mimetype not in allowed_types:
+        return jsonify({
+            "decoded": False,
+            "error": "Unsupported image type. Use PNG, JPG, JPEG or WebP.",
+        }), 400
+
+    image_data = uploaded.read(8 * 1024 * 1024 + 1)
+
+    if len(image_data) > 8 * 1024 * 1024:
+        return jsonify({
+            "decoded": False,
+            "error": "QR code image is too large. Maximum size is 8 MB.",
+        }), 413
+
+    if not image_data:
+        return jsonify({
+            "decoded": False,
+            "error": "The uploaded image is empty.",
+        }), 400
+
+    try:
+        buffer = np.frombuffer(image_data, dtype=np.uint8)
+        image = cv2.imdecode(buffer, cv2.IMREAD_COLOR)
+
+        if image is None:
+            return jsonify({
+                "decoded": False,
+                "error": "The uploaded file could not be decoded as an image.",
+            }), 400
+
+        detector = cv2.QRCodeDetector()
+        decoded_text, points, _ = detector.detectAndDecode(image)
+
+    except Exception:
+        return jsonify({
+            "decoded": False,
+            "error": "The QR code image could not be processed.",
+        }), 400
+
+    decoded_text = normalize_config(decoded_text)
+
+    if not decoded_text:
+        if points is not None:
+            error = "A QR code was detected, but its contents could not be decoded."
+        else:
+            error = "No QR code could be detected in the uploaded image."
+
+        return jsonify({
+            "decoded": False,
+            "error": error,
+        }), 400
+
+    errors = validate_config(decoded_text)
+
+    if errors:
+        return jsonify({
+            "decoded": False,
+            "error": "The QR code does not contain a valid WireGuard configuration.",
+            "errors": errors,
+        }), 400
+
+    return jsonify({
+        "decoded": True,
+        "config": decoded_text,
+        "summary": config_summary(decoded_text, ""),
     })
 
 

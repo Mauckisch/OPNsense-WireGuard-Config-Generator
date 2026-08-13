@@ -3,3 +3,5 @@ qrcode[pil]>=7.4,<9
 Pillow>=10,<13
 gunicorn>=22,<24
 cryptography>=45,<47
+opencv-python-headless>=5.0,<6
+numpy>=2,<3

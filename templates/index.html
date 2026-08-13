@@ -152,29 +152,59 @@
             >
 
 
-            <div
-              id="dropZone"
-              class="drop-zone"
-              tabindex="0"
-              role="button"
-              aria-label="Upload WireGuard configuration"
-            >
-              <div class="drop-icon">⇧</div>
+            <div class="upload-grid">
 
-              <strong>
-                Drop a WireGuard configuration here
-              </strong>
-
-              <span>
-                or click to choose a .conf or .txt file
-              </span>
-
-              <input
-                id="fileInput"
-                type="file"
-                accept=".conf,.txt,text/plain"
-                hidden
+              <div
+                id="dropZone"
+                class="drop-zone"
+                tabindex="0"
+                role="button"
+                aria-label="Upload WireGuard configuration"
               >
+                <div class="drop-icon">⇧</div>
+
+                <strong>
+                  Drop a WireGuard configuration here
+                </strong>
+
+                <span>
+                  or click to choose a .conf or .txt file
+                </span>
+
+                <input
+                  id="fileInput"
+                  type="file"
+                  accept=".conf,.txt,text/plain"
+                  hidden
+                >
+              </div>
+
+
+              <div
+                id="qrDropZone"
+                class="drop-zone qr-drop-zone"
+                tabindex="0"
+                role="button"
+                aria-label="Upload WireGuard QR code"
+              >
+                <div class="drop-icon qr-drop-icon">▦</div>
+
+                <strong>
+                  Drop a WireGuard QR code here
+                </strong>
+
+                <span>
+                  or click to choose a PNG, JPG or WebP image
+                </span>
+
+                <input
+                  id="qrFileInput"
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+                  hidden
+                >
+              </div>
+
             </div>
 
 
